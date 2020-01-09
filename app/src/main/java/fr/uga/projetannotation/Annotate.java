@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.provider.CalendarContract;
 import android.provider.ContactsContract;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -34,7 +35,6 @@ import java.util.List;
 import fr.uga.projetannotation.model.ContactAnnotation;
 import fr.uga.projetannotation.model.PicAnnotation;
 
-//TODO Sauvegarder et quitter ou juste quitter quand quit(annotate)
 public class Annotate extends AppCompatActivity {
 
     private static final int PICK_IMG = 1;
@@ -74,15 +74,14 @@ public class Annotate extends AppCompatActivity {
         adapter.getAllContactsUri().observe(this, new  Observer<List<Uri>>() {
             @Override
             public void onChanged(List<Uri> listContact) {
-                Log.v("je suis GIGA chiante", listContact.toString());
                 mAnnotateViewModel.setListContact(listContact);
             }
         });
 
+        //si des données sont stockées dans le VM :
         if(mAnnotateViewModel.getPicUri() != null ) {
             imgView.setImageURI(mAnnotateViewModel.getPicUri());
             if(mAnnotateViewModel.getContactsUri() != null) {
-                Log.v("je suis chiante", mAnnotateViewModel.getContactsUri().getValue().toString());
                 adapter.setListContact(mAnnotateViewModel.getContactsUri().getValue());
             }
             if (mAnnotateViewModel.getEventUri() != null) {
@@ -93,47 +92,103 @@ public class Annotate extends AppCompatActivity {
                 }
 
             }
-            // permet de supprimer un contact dans la BDD si un contact est supprimé sur l'UI :
-            adapter.getContactDelete().observe(this, new Observer<Uri>() {
-                @Override
-                public void onChanged(Uri uri) {
-                    mAnnotateViewModel.deleteContact(uri);
-                }
-            });
+
         }
         else {
+            // la photo pour l'annotation est choisie depuis la gallerie puis partagée à notre application :
             if (Intent.ACTION_SEND.equals(intent.getAction())) {
-                Uri imgUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
-                //tv.setText(imgUri.toString());
-                //Chngement si la valeur de l'event change, on doit actualiser la valeur sur l'UI
-                mAnnotateViewModel.getEventUri().observe(this, new  Observer<Uri>() {
-                    @Override
-                    public void onChanged(Uri uri) {
-                        String id = uri.getLastPathSegment();
-                        eventView.setText(getEventName(id));
-                    }
-                });
+                if(intent.getStringExtra("IMGURI") != null) {
+                    Uri imgUri = (Uri) Uri.parse(intent.getStringExtra("IMGURI"));
 
-                mAnnotateViewModel.getContactsUri().observe(this, new  Observer<List<Uri>>() {
-                    @Override
-                    public void onChanged(List<Uri> contactsUri) {
-                        //appeler adapter.setContact(list contacts Uri) -> changer la méthode dans l'adapater et gérer l'insertion dans la liste des contacts
-                        // par la suite : gérer la suppression
-                    }
-                });
-                //afficher l'image :
-                //pb pour la résolution des images (si trop grosse cette méthode sera problématique : => utiliser glide android
-                imgView.setImageURI(imgUri);
+                    mAnnotateViewModel.setPicUri(imgUri);
 
+                    // Permet de définir les données si la photo est déjà annotée dans la BDD :
+                    mAnnotateViewModel.getPicAnnotation(imgUri).observe(this, new Observer<PicAnnotation>() {
+                        public void onChanged(@Nullable PicAnnotation annotation) {
+                            if (annotation != null) {
+                                if (annotation.getEventUri() != null) {
+                                    eventView.setText(getEventName(annotation.getEventUri().getLastPathSegment()));
+                                    mAnnotateViewModel.setEventUri(annotation.getEventUri());
+                                    findViewById(R.id.btnDeleteEvent).setVisibility(View.VISIBLE);
+                                }
+                                if (annotation.getContactUris() != null) {
+                                    for (Uri contact : annotation.getContactUris()) {
+                                        mAnnotateViewModel.setContactUri(contact);
+                                    }
+                                    adapter.setListContact(annotation.getContactUris());
+                                }
+                            }
+                        }
+                    });
+
+                    //Changement si la valeur de l'event change, on doit actualiser la valeur sur l'UI
+                    mAnnotateViewModel.getEventUri().observe(this, new  Observer<Uri>() {
+                        @Override
+                        public void onChanged(Uri uri) {
+                            String id = uri.getLastPathSegment();
+                            eventView.setText(getEventName(id));
+                        }
+                    });
+
+                    mAnnotateViewModel.getContactsUri().observe(this, new  Observer<List<Uri>>() {
+                        @Override
+                        public void onChanged(List<Uri> contactsUri) {
+                            //appeler adapter.setContact(list contacts Uri) -> changer la méthode dans l'adapater et gérer l'insertion dans la liste des contacts
+                            // par la suite : gérer la suppression
+                        }
+                    });
+                    //afficher l'image :
+                    //pb pour la résolution des images (si trop grosse cette méthode sera problématique : => utiliser glide android
+                    imgView.setImageURI(imgUri);
+                }
+            // l'utilisateur lance l'annotation sans photo préalable -> pick photo à faire
             } else {
-                Intent pick = new Intent(Intent.ACTION_PICK);
-                pick.setType("image/*");
-                this.startActivityForResult(pick, PICK_IMG);
+                if(intent.getStringExtra("IMGURI") == null) {
+                    Intent pick = new Intent(Intent.ACTION_PICK);
+                    pick.setType("image/*");
+                    this.startActivityForResult(pick, PICK_IMG);
+                }
             }
         }
 
 
 
+    }
+
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        //Handle the back button
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            new AlertDialog.Builder(this)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setMessage("Êtes vous sûr de vouloir quitter sans sauvegarder ?")
+
+                    //si on ne veut pas sauvegarder les changements mais que l'utilisateur avait supprimé des contact ou un event, on doit les réinsérer dans la BDD :
+                    .setPositiveButton("Quitter", new DialogInterface.OnClickListener() {
+
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if (mAnnotateViewModel.getDeletedContact().size() > 0) {
+                                for (Uri contact : mAnnotateViewModel.getDeletedContact()) {
+                                    mAnnotateViewModel.insertPictureContact(new ContactAnnotation(mAnnotateViewModel.getPicUri(), contact));
+                                }
+                            }
+                            finish();
+                        }
+
+                    })
+                    .setNegativeButton("Sauvegarder & quitter", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            mAnnotateViewModel.save();
+                            finish();
+                        }
+                    })
+                    .show();
+
+                return true;
+        } else {
+            return super.onKeyDown(keyCode, event);
+        }
     }
 
     // affiche les données, sans on avait l'interface de base meme avec le pick
@@ -163,6 +218,14 @@ public class Annotate extends AppCompatActivity {
                             adapter.setListContact(annotation.getContactUris());
                         }
                     }
+                }
+            });
+
+            // permet de supprimer un contact dans la BDD si un contact est supprimé sur l'UI :
+            adapter.getContactDelete().observe(this, new Observer<Uri>() {
+                @Override
+                public void onChanged(Uri uri) {
+                    mAnnotateViewModel.deleteContact(uri);
                 }
             });
 
@@ -277,7 +340,6 @@ public class Annotate extends AppCompatActivity {
     }
 
     // confirmation pour quitter l'activité sans sauvegarder
-    // TODO: à remplacer par un "sauvegarder et quitter" ou juste "quitter"
     public void onCancelClick(View v){
         new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
@@ -302,11 +364,6 @@ public class Annotate extends AppCompatActivity {
                 .show();
     }
 
-    // Sauvegarde si l'utilisateur appuie sur le bouton de sauvegarde
-    public void onSaveClick(View v){
-        mAnnotateViewModel.save();
-        Toast.makeText(this,"Sauvegardé",Toast.LENGTH_LONG).show();
-    }
 
     // Sauvegarder et quitter
     public void onFinishClick(View v){

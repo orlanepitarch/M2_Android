@@ -2,14 +2,12 @@ package fr.uga.projetannotation;
 
 import android.app.Application;
 import android.net.Uri;
-import android.util.Log;
 
-import androidx.annotation.Nullable;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MediatorLiveData;
+
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Observer;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +21,7 @@ public class AnnotateViewModel extends AndroidViewModel {
 
     private AnnotateRepository mRepository;
     private MutableLiveData<Uri> mPicUri;
-    private MutableLiveData<Uri> mEventUri = new MutableLiveData<Uri>();
+    private MutableLiveData<Uri> mEventUri;
     private MutableLiveData<List<Uri>> mContactsUri;
     private List<Uri> mContact;
     private List<Uri> mContactsDelete;
@@ -37,6 +35,7 @@ public class AnnotateViewModel extends AndroidViewModel {
         mContactsUri = new MutableLiveData<>();
         mContact = new ArrayList<>();
         mContactsDelete = new ArrayList<>();
+        mEventUri = new MutableLiveData<Uri>();
     }
 
     LiveData<PicAnnotation> getPicAnnotation(Uri picUri) {
@@ -56,13 +55,11 @@ public class AnnotateViewModel extends AndroidViewModel {
             mContact.clear();
         }
         mContact.addAll(listContacts);
-        Log.v("add", mContact.toString());
         mContactsUri.setValue(mContact);
     }
 
     void setEventUri(Uri eventUri) {
         mEventUri.setValue(eventUri);
-        //appeler insert
     }
 
     void setContactUri(Uri uri) {
@@ -92,9 +89,8 @@ public class AnnotateViewModel extends AndroidViewModel {
     }
 
     void save(){
-         insertPictureEvent(new EventAnnotation(getPicUri(), getEventUri().getValue()));
+        insertPictureEvent(new EventAnnotation(getPicUri(), getEventUri().getValue()));
         for (Uri contact : mContact) {
-            Log.v("SLT", contact.toString());
             insertPictureContact(new ContactAnnotation(getPicUri(), contact));
         }
         mContactsDelete = new ArrayList<>();

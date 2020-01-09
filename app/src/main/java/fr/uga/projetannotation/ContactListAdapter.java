@@ -5,30 +5,23 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
-import android.provider.CalendarContract;
 import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.selection.ItemDetailsLookup;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.ContactViewHolder> {
@@ -46,7 +39,6 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
     @Override
     public ContactViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View itemView = mInflater.inflate(R.layout.contact_item, parent, false);
-        //itemView.setOnClickListener();
         return new ContactViewHolder(itemView);
     }
 
@@ -102,7 +94,6 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
         holder.contactTitleItemView.setText(contactName);
         holder.position=position;
         holder.btnDelete.setOnClickListener(view -> deleteContact(mContactUri));
-        //holder.contactID=mCursor.getLong(mCursor.getColumnIndex(ContactsContract.Data._ID));
     }
 
     @Override
@@ -113,12 +104,7 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
     public void setContact(Uri uri) {
         if (!mContact.contains(uri)) {
             mContact.add(uri);
-            Log.v("gigig", mContact.toString());
-            if(mContactLive.getValue() != null) {
-                Log.v("adapter avant", mContactLive.getValue().toString());
-            }
             mContactLive.setValue(mContact);
-            Log.v("adapter apres", mContactLive.getValue().toString());
             this.notifyDataSetChanged();
         }
     }
@@ -129,12 +115,8 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
 
     public void deleteContact(Uri uri){
         mContactDelete.setValue(uri);
-
         mContact.remove(uri);
-        Log.v("adapter", mContact.toString());
         mContactLive.setValue(mContact);
-
-        Log.v("del", mContactLive.getValue().toString());
         this.notifyDataSetChanged();
     }
 

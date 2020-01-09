@@ -38,17 +38,6 @@
             app:layout_constraintVertical_bias="0.0"
             app:srcCompat="@android:drawable/checkbox_on_background" />
 
-        <ImageView
-            android:id="@+id/imageView4"
-            android:layout_width="26dp"
-            android:layout_height="0dp"
-            android:onClick="onSaveClick"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/imageView5"
-            app:layout_constraintStart_toEndOf="@+id/imageView3"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0"
-            app:srcCompat="@android:drawable/ic_menu_save" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout

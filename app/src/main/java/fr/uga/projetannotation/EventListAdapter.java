@@ -122,8 +122,6 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
         long jd = c.getTimeInMillis();
         c.set(year, month, dayOfMonth+ 1, 0, 0);
         long jf = c.getTimeInMillis();
-        Log.v("RES CALENDAR", "date debut = " +jd);
-        Log.v("RES CALENDAR", "date fin = " +jf);
         if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
 
 
@@ -133,22 +131,15 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
                     CalendarContract.Events.DTSTART + "<" + jf + " AND " + jd + "<" + CalendarContract.Events.DTEND,
                     null,
                     CalendarContract.Events.DTSTART + " ASC");
-        /*  Log.v("RES CALENDAR", "nb results ="+res.getCount());
-          while (res.moveToNext()) {
 
-              Log.v("RES CALENDAR", res.getString(1)+ "" + res.getString(2) +"" + res.getString(3));
-
-          }*/
             // mise à jour des éléments
             this.notifyDataSetChanged();
 
         }
     }
-    //créer classe event avec date deb et fin avec id et ajout event dans la liste
-    // afficher dans recycler view la liste des évènements
 
     // getItemCount() is called many times, and when it is first called,
-    // mWords has not been updated (means initially, it's null, and we can't return null).
+    // mCursor has not been updated (means initially, it's null, and we can't return null).
     @Override
     public int getItemCount() {
         if (mCursor==null){
