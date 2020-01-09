@@ -92,10 +92,7 @@ public class AnnotateViewModel extends AndroidViewModel {
     }
 
     void save(){
-        if (getEventUri().getValue() != null) {
-            Log.v("bla", "event save");
-            insertPictureEvent(new EventAnnotation(getPicUri(), getEventUri().getValue()));
-        }
+         insertPictureEvent(new EventAnnotation(getPicUri(), getEventUri().getValue()));
         for (Uri contact : mContact) {
             Log.v("SLT", contact.toString());
             insertPictureContact(new ContactAnnotation(getPicUri(), contact));

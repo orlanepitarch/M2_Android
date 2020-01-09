@@ -93,6 +93,13 @@ public class Annotate extends AppCompatActivity {
                 }
 
             }
+            // permet de supprimer un contact dans la BDD si un contact est supprimé sur l'UI :
+            adapter.getContactDelete().observe(this, new Observer<Uri>() {
+                @Override
+                public void onChanged(Uri uri) {
+                    mAnnotateViewModel.deleteContact(uri);
+                }
+            });
         }
         else {
             if (Intent.ACTION_SEND.equals(intent.getAction())) {
@@ -159,13 +166,6 @@ public class Annotate extends AppCompatActivity {
                 }
             });
 
-            // permet de supprimer un contact dans la BDD si un contact est supprimé sur l'UI :
-            adapter.getContactDelete().observe(this, new Observer<Uri>() {
-                @Override
-                public void onChanged(Uri uri) {
-                    mAnnotateViewModel.deleteContact(uri);
-                }
-            });
         }
         if (requestCode == PICK_CONTACT && resultCode == RESULT_OK) {
             Uri uri = data.getData();
@@ -282,6 +282,8 @@ public class Annotate extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setMessage("Êtes vous sûr de vouloir quitter sans sauvegarder ?")
+
+                //si on ne veut pas sauvegarder les changements mais que l'utilisateur avait supprimé des contact ou un event, on doit les réinsérer dans la BDD :
                 .setPositiveButton("Quitter", new DialogInterface.OnClickListener()
                 {
 
