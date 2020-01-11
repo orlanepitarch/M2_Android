@@ -27,11 +27,14 @@ public interface PicAnnotationDao {
     void insertPictureContact(ContactAnnotation a);
 
     @Query("DELETE FROM event_annotation")
-    void deleteAll();
+    void deleteAllEvent();
+
+    @Query("DELETE FROM event_annotation")
+    void deleteAllContact();
 
     @Transaction
-    @Query("SELECT * FROM event_annotation")
-    List<EventAnnotation> loadAnnotations();
+    @Query("SELECT picUri FROM event_annotation")
+    LiveData<List<Uri>> loadAnnotations();
 
     @Query("SELECT eventUri from event_annotation where picUri=:picUri")
     LiveData<Uri> getEvent(Uri picUri);
@@ -46,6 +49,4 @@ public interface PicAnnotationDao {
     @Query("SELECT eventUri from event_annotation where picUri=:picUri")
     LiveData<Uri> getEventAnnotation(Uri picUri);
 
-    @RawQuery
-    LiveData<List<PicAnnotation>> getAnnotation(SupportSQLiteQuery query);
 }

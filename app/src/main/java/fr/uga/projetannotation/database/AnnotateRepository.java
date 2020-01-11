@@ -56,6 +56,10 @@ public class AnnotateRepository {
         return mAnnotationDao.getPicAnnotation(picUri);
     }
 
+    public LiveData<List<Uri>> getAllAnnotation() {
+        return mAnnotationDao.loadAnnotations();
+    }
+
     public void deletePictureContact(ContactAnnotation contactUri) {
         AnnotationDatabase.databaseWriteExecutor.execute(() -> {
             mAnnotationDao.deleteContact(contactUri);
@@ -74,14 +78,10 @@ public class AnnotateRepository {
     }
 
     public void deleteAll(){
-        mAnnotationDao.deleteAll();
+        AnnotationDatabase.databaseWriteExecutor.execute(() -> {
+            mAnnotationDao.deleteAllContact();
+            mAnnotationDao.deleteAllEvent();
+        });
     }
 
-    public void getAnnotation() {
-        LiveData<List<PicAnnotation>> result = new LiveData<List<PicAnnotation>>() {};
-        result = mAnnotationDao.getAnnotation(
-                new SimpleSQLiteQuery("SELECT * FROM event_annotation LIMIT "));
-
-        Log.v("bla", String.valueOf(result.getValue().size()));
-    }
 }

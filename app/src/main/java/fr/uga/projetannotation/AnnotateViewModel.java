@@ -28,7 +28,7 @@ public class AnnotateViewModel extends AndroidViewModel {
 
     private LiveData<List<EventAnnotation>> mAllAnnotation;
 
-    public AnnotateViewModel (Application application) {
+    public AnnotateViewModel(Application application) {
         super(application);
         mRepository = new AnnotateRepository(application);
         mPicUri = new MutableLiveData<>();

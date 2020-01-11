@@ -140,12 +140,22 @@ public class Annotate extends AppCompatActivity {
                     //afficher l'image :
                     //pb pour la résolution des images (si trop grosse cette méthode sera problématique : => utiliser glide android
                     imgView.setImageURI(imgUri);
+
+                    // permet de supprimer un contact dans la BDD si un contact est supprimé sur l'UI :
+                    adapter.getContactDelete().observe(this, new Observer<Uri>() {
+                        @Override
+                        public void onChanged(Uri uri) {
+                            mAnnotateViewModel.deleteContact(uri);
+                        }
+                    });
                 }
             // l'utilisateur lance l'annotation sans photo préalable -> pick photo à faire
             } else {
                 if(intent.getStringExtra("IMGURI") == null) {
-                    Intent pick = new Intent(Intent.ACTION_PICK);
+                    Intent pick = new Intent(Intent.ACTION_OPEN_DOCUMENT);
                     pick.setType("image/*");
+                    pick.addFlags((Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION));
                     this.startActivityForResult(pick, PICK_IMG);
                 }
             }
@@ -155,6 +165,7 @@ public class Annotate extends AppCompatActivity {
 
     }
 
+    //Affiche un message pour choisir entre "Sauvegarder et Quitter" et "quitter" quand l'utilisateur appuie sur le bouton retour de sont téléphone.
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         //Handle the back button
         if (keyCode == KeyEvent.KEYCODE_BACK) {
@@ -199,11 +210,19 @@ public class Annotate extends AppCompatActivity {
         // + permet d'étudier que ça concerne bien le choix d'image
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_IMG && resultCode == RESULT_OK) {
-            mAnnotateViewModel.setPicUri(data.getData());
+            final Uri imageUri = data.getData();
+
+            final int takeFlags = data.getFlags()
+                    & (Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            // Check for the freshest data.
+            this.getContentResolver().takePersistableUriPermission(imageUri, takeFlags);
+            mAnnotateViewModel.setPicUri(imageUri);
+
             imgView.setImageURI(mAnnotateViewModel.getPicUri());
 
             // Permet de définir les données si la photo est déjà annotée dans la BDD :
-            mAnnotateViewModel.getPicAnnotation(data.getData()).observe(this, new Observer<PicAnnotation>() {
+            mAnnotateViewModel.getPicAnnotation(imageUri).observe(this, new Observer<PicAnnotation>() {
                 public void onChanged(@Nullable PicAnnotation annotation) {
                     if(annotation != null) {
                         if(annotation.getEventUri() != null) {
