@@ -79,9 +79,33 @@ public class AnnotateRepository {
 
     public void deleteAll(){
         AnnotationDatabase.databaseWriteExecutor.execute(() -> {
-            mAnnotationDao.deleteAllContact();
             mAnnotationDao.deleteAllEvent();
+            mAnnotationDao.deleteAllContact();
         });
     }
+
+    public void deletePicAnnot(Uri picUri) {
+        AnnotationDatabase.databaseWriteExecutor.execute(() -> {
+            mAnnotationDao.deletePicEvent(picUri);
+            mAnnotationDao.deletePicContacts(picUri);
+        });
+    }
+
+    public LiveData<List<Uri>> searchByOneContact(Uri contactUri) {
+        return mAnnotationDao.searchByOneContact(contactUri);
+    }
+
+    public LiveData<List<Uri>> searchByContacts(List<Uri> contactsUri) {
+        return mAnnotationDao.searchByContacts(contactsUri, contactsUri.size());
+    }
+
+    public LiveData<List<Uri>> searchByEvent(Uri eventUri) {
+        return mAnnotationDao.searchByEvent(eventUri);
+    }
+
+    public LiveData<List<Uri>> searchByEventAndContacts(Uri eventUri, List<Uri> contactsUri) {
+        return mAnnotationDao.searchByEventAndContacts(eventUri, contactsUri, contactsUri.size());
+    }
+
 
 }

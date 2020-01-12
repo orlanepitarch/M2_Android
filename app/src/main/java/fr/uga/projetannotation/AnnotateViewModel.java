@@ -35,7 +35,7 @@ public class AnnotateViewModel extends AndroidViewModel {
         mContactsUri = new MutableLiveData<>();
         mContact = new ArrayList<>();
         mContactsDelete = new ArrayList<>();
-        mEventUri = new MutableLiveData<Uri>();
+        mEventUri = new MutableLiveData<>();
     }
 
     LiveData<PicAnnotation> getPicAnnotation(Uri picUri) {
@@ -75,8 +75,6 @@ public class AnnotateViewModel extends AndroidViewModel {
 
     public MutableLiveData<List<Uri>> getContactsUri() { return mContactsUri; }
 
-    LiveData<List<EventAnnotation>> getAllAnnotation() { return mAllAnnotation; }
-
     void insertPictureEvent(EventAnnotation event) {
         mRepository.insertPictureEvent(event);
     }
@@ -89,9 +87,11 @@ public class AnnotateViewModel extends AndroidViewModel {
     }
 
     void save(){
-        insertPictureEvent(new EventAnnotation(getPicUri(), getEventUri().getValue()));
-        for (Uri contact : mContact) {
-            insertPictureContact(new ContactAnnotation(getPicUri(), contact));
+        if(getEventUri().getValue() != null || (getContactsUri().getValue() != null && getContactsUri().getValue().size() > 0)) {
+            insertPictureEvent(new EventAnnotation(getPicUri(), getEventUri().getValue()));
+            for (Uri contact : mContact) {
+                insertPictureContact(new ContactAnnotation(getPicUri(), contact));
+            }
         }
         mContactsDelete = new ArrayList<>();
     }
@@ -103,5 +103,9 @@ public class AnnotateViewModel extends AndroidViewModel {
 
     public List<Uri> getDeletedContact() {
         return mContactsDelete;
+    }
+
+    public void deleteAnnotation() {
+        mRepository.deletePicAnnot(getPicUri());
     }
 }

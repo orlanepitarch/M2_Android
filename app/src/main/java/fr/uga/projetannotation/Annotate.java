@@ -40,12 +40,9 @@ public class Annotate extends AppCompatActivity {
     private static final int PICK_IMG = 1;
     private static final int PICK_CONTACT = 2;
     private static final int PICK_EVENT = 3;
-    private TextView tv;
     private ImageView imgView;
     private RecyclerView contactView;
     private TextView eventView;
-    private String mContactName;
-    private String mEventName;
     private final static int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 1;
     private boolean readContactAuthorized = false;
     private ContactListAdapter adapter;
@@ -206,9 +203,11 @@ public class Annotate extends AppCompatActivity {
     // test sur les request code pour séparé le code en fonction de la provenance du startActivityForResult
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        //le if est utile si on fait retour avant d'avoir choisi une image -> sinon erreur
-        // + permet d'étudier que ça concerne bien le choix d'image
         super.onActivityResult(requestCode, resultCode, data);
+        // on stop l'annotation si aucune image n'a été choisi :
+        if(requestCode == PICK_IMG && resultCode != RESULT_OK) {
+            finish();
+        }
         if (requestCode == PICK_IMG && resultCode == RESULT_OK) {
             final Uri imageUri = data.getData();
 
@@ -390,5 +389,21 @@ public class Annotate extends AppCompatActivity {
         finish();
     }
 
+    // Suoorimer l'annotation :
+    public void onDeleteClick(View v){
+        new AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setMessage("Êtes vous sûr de vouloir supprimer cette annotation ?")
+                .setPositiveButton("Oui", new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mAnnotateViewModel.deleteAnnotation();
+                        finish();
+                    }
+                })
+                .setNegativeButton("Annuler", null)
+                .show();
+    }
 
 }

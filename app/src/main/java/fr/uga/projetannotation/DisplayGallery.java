@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
@@ -45,35 +46,47 @@ import fr.uga.projetannotation.model.PicAnnotation;
 public class DisplayGallery extends AppCompatActivity {
     static final int REQUEST_PERMISSION_KEY = 1;
     private boolean readGalleryAuthorized = false;
+    private DisplayGalleryViewModel mDisplayGalleryViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mDisplayGalleryViewModel = new ViewModelProvider(this).get(DisplayGalleryViewModel.class);
         setContentView(R.layout.display_all_pictures);
         final GridView gridView = findViewById(R.id.gridView);
         final MutableLiveData<List<Uri>> listAnnot = new MutableLiveData<>();
         checkReadGalleryPermission();
         final GalleryAdapter galleryAdapter = new GalleryAdapter(this, listAnnot.getValue());
-        Intent intent = getIntent();
-        String action = intent.getAction();
-        String type = intent.getType();
-        String test1 = intent.getStringExtra("IMGURIS");
-        List<String> imgUriString = (List<String>) Arrays.asList(test1.substring(1, test1.length()-1).split("\\s*(,\\s*)+"));
-        List<Uri> imgUri = new ArrayList<>();
-        for (String uri : imgUriString) {
-            Log.v("bla", Arrays.asList(uri.split("/")).toString());
-            if(Arrays.asList(uri.split("/")).get(3).equals("document")) {
-                Log.v("slt", Arrays.asList(uri.split("/")).get(3));
-                imgUri.add(Uri.parse(uri));
-            } else {
-                Toast.makeText(this,"Attention, vos données contiennent des données non compatibles avec la galerie",Toast.LENGTH_LONG).show();
+        if(mDisplayGalleryViewModel.getPicUris().size() != 0 ) {
+            if(readGalleryAuthorized) {
+                gridView.setAdapter(galleryAdapter);
+                Log.v("lll", "START GALLERY BY VM WITH " + mDisplayGalleryViewModel.getPicUris().toString());
+                galleryAdapter.setData(mDisplayGalleryViewModel.getPicUris());
             }
+        } else {
+            Intent intent = getIntent();
+            String test1 = intent.getStringExtra("IMGURIS");
+            Log.v("lll", "START GALLERY WITH " + test1);
+            List<String> imgUriString = (List<String>) Arrays.asList(test1.substring(1, test1.length()-1).split("\\s*(,\\s*)+"));
+            Log.v("slt",Integer.toString(imgUriString.size()));
+            List<Uri> imgUri = new ArrayList<>();
+            if(imgUriString.size() != 0 && !imgUriString.toString().equals("[]")) {
+                for (String uri : imgUriString) {
+                    if(Arrays.asList(uri.split("/")).get(3).equals("document")) {
+                        imgUri.add(Uri.parse(uri));
+                    } else {
+                        Toast.makeText(this,"Attention, vos données contiennent des données non compatibles avec la galerie",Toast.LENGTH_LONG).show();
+                    }
 
+                }
+            }
+            if(readGalleryAuthorized) {
+                gridView.setAdapter(galleryAdapter);
+                mDisplayGalleryViewModel.setPicUris(imgUri);
+                galleryAdapter.setData(imgUri);
+            }
         }
-        if(readGalleryAuthorized) {
-            gridView.setAdapter(galleryAdapter);
-            galleryAdapter.setData(imgUri);
-        }
+
 
 
         // When the user clicks on the GridItem
@@ -81,11 +94,9 @@ public class DisplayGallery extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> a, View v, int position, long id) {
                 Object o = gridView.getItemAtPosition(position);
-                Uri pic = (Uri) o;
                 Intent intentAct = new Intent(DisplayGallery.this, Annotate.class);
                 intentAct.putExtra("IMGURI", o.toString());
                 intentAct.setAction(Intent.ACTION_SEND);
-                intent.setFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                 DisplayGallery.this.startActivity(intentAct);
             }
         });
@@ -113,7 +124,6 @@ public class DisplayGallery extends AppCompatActivity {
                 data.clear();
             }
             this.data.addAll(data);
-            Log.v("dd", this.data.toString());
             this.notifyDataSetChanged();
         }
 
@@ -150,14 +160,7 @@ public class DisplayGallery extends AppCompatActivity {
                 }
 
                 Uri picUri = this.data.get(position);
-                //holder.picUri.setImageURI(Uri.parse(picUri));
-            try {
                 holder.picUri.setImageURI(picUri);
-
-            } catch(Exception e) {
-                Log.v("Set imgView", "PERMISSION PB "+e);
-                Log.v("trelou", picUri.toString());
-            }
 
             return convertView;
         }

@@ -29,11 +29,11 @@ public interface PicAnnotationDao {
     @Query("DELETE FROM event_annotation")
     void deleteAllEvent();
 
-    @Query("DELETE FROM event_annotation")
+    @Query("DELETE FROM contact_annotation")
     void deleteAllContact();
 
     @Transaction
-    @Query("SELECT picUri FROM event_annotation")
+    @Query("SELECT picUri FROM event_annotation UNION SELECT picUri FROM contact_annotation")
     LiveData<List<Uri>> loadAnnotations();
 
     @Query("SELECT eventUri from event_annotation where picUri=:picUri")
@@ -42,11 +42,33 @@ public interface PicAnnotationDao {
     @Delete
     void deleteContact(ContactAnnotation c);
 
+    @Query("DELETE FROM event_annotation WHERE picUri=:uri")
+    void deletePicEvent(Uri uri);
+
+    @Query("DELETE FROM contact_annotation WHERE picUri=:uri")
+    void deletePicContacts(Uri uri);
+
     @Transaction
     @Query("SELECT * from event_annotation where picUri=:picUri")
     LiveData<PicAnnotation> getPicAnnotation(Uri picUri);
 
     @Query("SELECT eventUri from event_annotation where picUri=:picUri")
     LiveData<Uri> getEventAnnotation(Uri picUri);
+
+    @Transaction
+    @Query("SELECT picUri from contact_annotation where contactUri=:contactUri")
+    LiveData<List<Uri>> searchByOneContact(Uri contactUri);
+
+    @Transaction
+    @Query("SELECT picUri from contact_annotation where contactUri IN (:contactUri) GROUP BY picUri HAVING COUNT(picUri) == :sizeContact")
+    LiveData<List<Uri>> searchByContacts(List<Uri> contactUri, Integer sizeContact);
+
+    @Transaction
+    @Query("SELECT picUri from event_annotation where eventUri=:eventUri")
+    LiveData<List<Uri>> searchByEvent(Uri eventUri);
+
+    @Transaction
+    @Query("SELECT picUri from event_annotation where eventUri=:eventUri INTERSECT SELECT picUri from contact_annotation where contactUri IN (:contactUri) GROUP BY picUri HAVING COUNT(picUri) == :sizeContact")
+    LiveData<List<Uri>> searchByEventAndContacts(Uri eventUri, List<Uri> contactUri, Integer sizeContact);
 
 }
