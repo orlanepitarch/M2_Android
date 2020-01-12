@@ -56,16 +56,16 @@ public interface PicAnnotationDao {
     LiveData<Uri> getEventAnnotation(Uri picUri);
 
     @Transaction
-    @Query("SELECT picUri from contact_annotation where contactUri=:contactUri")
-    LiveData<List<Uri>> searchByOneContact(Uri contactUri);
-
-    @Transaction
     @Query("SELECT picUri from contact_annotation where contactUri IN (:contactUri) GROUP BY picUri HAVING COUNT(picUri) == :sizeContact")
     LiveData<List<Uri>> searchByContacts(List<Uri> contactUri, Integer sizeContact);
 
     @Transaction
     @Query("SELECT picUri from event_annotation where eventUri=:eventUri")
     LiveData<List<Uri>> searchByEvent(Uri eventUri);
+
+    @Transaction
+    @Query("SELECT picUri from event_annotation where eventUri IN (:eventsUri)")
+    LiveData<List<Uri>> searchByEvents(List<Uri> eventsUri);
 
     @Transaction
     @Query("SELECT picUri from event_annotation where eventUri=:eventUri INTERSECT SELECT picUri from contact_annotation where contactUri IN (:contactUri) GROUP BY picUri HAVING COUNT(picUri) == :sizeContact")

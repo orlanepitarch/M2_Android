@@ -30,6 +30,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Arrays;
 import java.util.List;
 
 import fr.uga.projetannotation.model.ContactAnnotation;
@@ -78,11 +79,11 @@ public class Annotate extends AppCompatActivity {
         //si des données sont stockées dans le VM :
         if(mAnnotateViewModel.getPicUri() != null ) {
             imgView.setImageURI(mAnnotateViewModel.getPicUri());
-            if(mAnnotateViewModel.getContactsUri() != null) {
+            if(mAnnotateViewModel.getContactsUri().getValue() != null) {
                 adapter.setListContact(mAnnotateViewModel.getContactsUri().getValue());
             }
-            if (mAnnotateViewModel.getEventUri() != null) {
-                if (mAnnotateViewModel.getEventUri().getValue() != null && findViewById(R.id.btnDeleteEvent) != null) {
+            if (mAnnotateViewModel.getEventUri().getValue() != null) {
+                if (findViewById(R.id.btnDeleteEvent) != null) {
                     eventView.setText(getEventName(mAnnotateViewModel.getEventUri().getValue().getLastPathSegment()));
                     ImageView btnDeleteEvent = findViewById(R.id.btnDeleteEvent);
                     btnDeleteEvent.setVisibility(View.VISIBLE);
@@ -92,10 +93,13 @@ public class Annotate extends AppCompatActivity {
 
         }
         else {
-            // la photo pour l'annotation est choisie depuis la gallerie puis partagée à notre application :
+            // la photo pour l'annotation est choisie depuis la galerie puis partagée à notre application :
             if (Intent.ACTION_SEND.equals(intent.getAction())) {
                 if(intent.getStringExtra("IMGURI") != null) {
                     Uri imgUri = (Uri) Uri.parse(intent.getStringExtra("IMGURI"));
+                    if(!Arrays.asList(imgUri.toString().split("/")).get(3).equals("document")) {
+                        Toast.makeText(this,"Attention, cette source d'image n'est pas compatible avec la galerie d'annotation",Toast.LENGTH_LONG).show();
+                    }
 
                     mAnnotateViewModel.setPicUri(imgUri);
 

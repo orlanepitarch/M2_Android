@@ -91,16 +91,16 @@ public class AnnotateRepository {
         });
     }
 
-    public LiveData<List<Uri>> searchByOneContact(Uri contactUri) {
-        return mAnnotationDao.searchByOneContact(contactUri);
-    }
-
     public LiveData<List<Uri>> searchByContacts(List<Uri> contactsUri) {
         return mAnnotationDao.searchByContacts(contactsUri, contactsUri.size());
     }
 
     public LiveData<List<Uri>> searchByEvent(Uri eventUri) {
         return mAnnotationDao.searchByEvent(eventUri);
+    }
+
+    public LiveData<List<Uri>> searchByEvents(List<Uri> eventsUri) {
+        return mAnnotationDao.searchByEvents(eventsUri);
     }
 
     public LiveData<List<Uri>> searchByEventAndContacts(Uri eventUri, List<Uri> contactsUri) {

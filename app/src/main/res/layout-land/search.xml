@@ -8,6 +8,47 @@
     android:id="@+id/ConstraintLayout">
 
     <Button
+        android:id="@+id/dateDepart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onDepartDateClick"
+        android:text="Date de départ"
+        app:layout_constraintBottom_toTopOf="@+id/SearchResult"
+        app:layout_constraintEnd_toStartOf="@+id/dateFin"
+        app:layout_constraintHorizontal_bias="0.492"
+        app:layout_constraintStart_toEndOf="@+id/SearchResult"
+        app:layout_constraintTop_toBottomOf="@+id/eventName"
+        app:layout_constraintVertical_bias="0.492"
+        tools:layout_conversion_absoluteHeight="48dp"
+        tools:layout_conversion_absoluteWidth="411dp" />
+
+    <Button
+        android:id="@+id/dateFin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onDateFinClick"
+        android:text="Date de fin"
+        app:layout_constraintBottom_toTopOf="@+id/SearchResult"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.975"
+        app:layout_constraintStart_toEndOf="@+id/SearchResult"
+        app:layout_constraintTop_toBottomOf="@+id/eventName"
+        app:layout_constraintVertical_bias="0.492"
+        tools:layout_conversion_absoluteHeight="48dp"
+        tools:layout_conversion_absoluteWidth="411dp" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Recherche basée sur event pendant une durée définie :"
+        app:layout_constraintBottom_toTopOf="@+id/dateDepart"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.987"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/eventName" />
+
+    <Button
         android:id="@+id/btnChooseEvent2"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
@@ -23,11 +64,12 @@
         android:id="@+id/SearchResult"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="8dp"
         android:onClick="onSearchClick"
         android:text="Rechercher"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.499"
         app:layout_constraintStart_toStartOf="parent"
         tools:layout_conversion_absoluteHeight="48dp"
         tools:layout_conversion_absoluteWidth="411dp" />
@@ -63,9 +105,10 @@
         android:id="@+id/eventName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/textView3"
         app:layout_constraintEnd_toEndOf="@+id/btnChooseEvent2"
         app:layout_constraintStart_toStartOf="@+id/btnChooseEvent2"
-        app:layout_constraintTop_toTopOf="@+id/contactView"
+        app:layout_constraintTop_toBottomOf="@+id/btnChooseEvent2"
         tools:layout_conversion_absoluteHeight="0dp"
         tools:layout_conversion_absoluteWidth="411dp">
 
@@ -96,5 +139,72 @@
             app:srcCompat="@android:drawable/ic_menu_delete"
             tools:layout_conversion_absoluteHeight="27dp"
             tools:layout_conversion_absoluteWidth="29dp" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/DepartDateLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/SearchResult"
+        app:layout_constraintEnd_toEndOf="@+id/dateDepart"
+        app:layout_constraintStart_toStartOf="@+id/dateDepart"
+        app:layout_constraintTop_toBottomOf="@+id/dateDepart">
+
+        <TextView
+            android:id="@+id/displayDateDepart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" "
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btnDeleteDateDepart"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/btnDeleteDateDepart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="1dp"
+            android:onClick="onDeleteDateDepartClick"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/displayDateDepart"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@android:drawable/ic_delete" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/DateFinLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/SearchResult"
+        app:layout_constraintEnd_toEndOf="@+id/dateFin"
+        app:layout_constraintStart_toStartOf="@+id/dateFin"
+        app:layout_constraintTop_toBottomOf="@+id/dateFin">
+
+        <TextView
+            android:id="@+id/displayDateFin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" "
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/btnDeleteDateFin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onDeleteDateFinClick"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/displayDateFin"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0"
+            app:srcCompat="@android:drawable/ic_delete" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

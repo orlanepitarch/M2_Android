@@ -47,11 +47,6 @@ public class MainActivityPicAnnote extends AppCompatActivity {
             );
             dao.insertPictureContact(ca);
 
-            /*List<PicAnnotation> res = dao.loadAnnotations();
-            Log.v("ANNOT", "coucou");
-            for (PicAnnotation a : res) {
-                Log.v("ANNOT", a.toString());
-            }*/
         });
 
     }

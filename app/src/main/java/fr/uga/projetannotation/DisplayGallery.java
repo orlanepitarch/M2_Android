@@ -60,15 +60,12 @@ public class DisplayGallery extends AppCompatActivity {
         if(mDisplayGalleryViewModel.getPicUris().size() != 0 ) {
             if(readGalleryAuthorized) {
                 gridView.setAdapter(galleryAdapter);
-                Log.v("lll", "START GALLERY BY VM WITH " + mDisplayGalleryViewModel.getPicUris().toString());
                 galleryAdapter.setData(mDisplayGalleryViewModel.getPicUris());
             }
         } else {
             Intent intent = getIntent();
             String test1 = intent.getStringExtra("IMGURIS");
-            Log.v("lll", "START GALLERY WITH " + test1);
             List<String> imgUriString = (List<String>) Arrays.asList(test1.substring(1, test1.length()-1).split("\\s*(,\\s*)+"));
-            Log.v("slt",Integer.toString(imgUriString.size()));
             List<Uri> imgUri = new ArrayList<>();
             if(imgUriString.size() != 0 && !imgUriString.toString().equals("[]")) {
                 for (String uri : imgUriString) {

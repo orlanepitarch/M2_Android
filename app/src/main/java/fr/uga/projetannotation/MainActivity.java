@@ -22,6 +22,7 @@ import fr.uga.projetannotation.model.ContactAnnotation;
 
 public class MainActivity extends AppCompatActivity {
     public AnnotateRepository mRepository;
+    private int countCallGallery;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,10 +56,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void ViewClick(View v){
+        countCallGallery = 0;
         Toast.makeText(this, "Chargement en cours",Toast.LENGTH_LONG).show();
         mRepository.getAllAnnotation().observe(this, new Observer<List<Uri>>() {
             public void onChanged(@Nullable List<Uri> annotation) {
-                if (annotation != null) {
+                Log.v("cc", Integer.toString(countCallGallery));
+                //évite le lancement de la galerie à l'infini si on modifie l'annotation en cliquant dessus depuis la galerie : (
+                //on lance une seule fois l'activité même si les données change pdt qu'elle est lancées)
+                if (annotation != null && countCallGallery == 0) {
+                    countCallGallery = countCallGallery+1;
                     Intent intent = new Intent(MainActivity.this, DisplayGallery.class);
                     intent.putExtra("IMGURIS", annotation.toString());
                     intent.setAction(Intent.ACTION_SEND);

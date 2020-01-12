@@ -82,7 +82,6 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
     }
 
     private final LayoutInflater mInflater;
-    private List<String> mWords; // Cached copy of words
 
     EventListAdapter(Context context) {
         mInflater = LayoutInflater.from(context);
