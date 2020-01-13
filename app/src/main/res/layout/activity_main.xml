@@ -9,20 +9,23 @@
     <Button
         android:id="@+id/delNonConform"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="64dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="44dp"
+        android:layout_marginBottom="64dp"
         android:onClick="DelNonConformClick"
         android:text="Del Non Conform Annotation"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/DelAll" />
+        app:layout_constraintTop_toBottomOf="@+id/DelAll"
+        app:layout_constraintVertical_bias="0.026" />
 
     <Button
         android:id="@+id/DelAll"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="64dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="44dp"
         android:onClick="DelAllClick"
         android:text="Del All Annotation"
         app:layout_constraintEnd_toEndOf="parent"
@@ -43,8 +46,8 @@
     <Button
         android:id="@+id/btnAnnotate"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="64dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="44dp"
         android:onClick="AnnotateClick"
         android:text="Annotate"
         app:layout_constraintEnd_toEndOf="parent"
@@ -54,22 +57,24 @@
     <Button
         android:id="@+id/btnSearch"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="64dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="44dp"
         android:onClick="SearchClick"
         android:text="Search"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.501"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnAnnotate" />
 
     <Button
         android:id="@+id/btnView"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="64dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="44dp"
         android:onClick="ViewClick"
         android:text="View"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.501"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnSearch" />
 

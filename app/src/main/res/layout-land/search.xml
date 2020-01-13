@@ -91,12 +91,13 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/contactView"
-        android:layout_width="306dp"
+        android:layout_width="270dp"
         android:layout_height="141dp"
+        android:layout_marginStart="50dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/btnChooseContact2"
-        app:layout_constraintHorizontal_bias="0.546"
-        app:layout_constraintStart_toStartOf="@+id/btnChooseContact2"
+        app:layout_constraintHorizontal_bias="0.314"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:layout_conversion_absoluteHeight="539dp"
         tools:layout_conversion_absoluteWidth="411dp" />

@@ -26,6 +26,7 @@
         android:text="Date de départ"
         app:layout_constraintBottom_toTopOf="@+id/SearchResult"
         app:layout_constraintEnd_toStartOf="@+id/SearchResult"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/eventName"
         app:layout_constraintVertical_bias="0.504"
