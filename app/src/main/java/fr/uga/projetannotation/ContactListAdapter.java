@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
+//affiche bien dans le recyclerView en fonction des données du VM d'annotate et des informtions données à l'adapter depuis Annotate :
 public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.ContactViewHolder> {
     private final Context mContext;
 
@@ -124,6 +125,7 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
         return mContactLive;
     }
 
+    //renvoie le nom du contact en fonction de l'uri afin d'afficher son nom sur l'UI, ce qui est mieux pour l'utilisateur :
     public String getContactName(Uri uri) {
         Cursor cursor = null;
         String result = "";

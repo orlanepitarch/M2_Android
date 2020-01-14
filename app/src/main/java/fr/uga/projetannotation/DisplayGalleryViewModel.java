@@ -4,17 +4,11 @@ import android.app.Application;
 import android.net.Uri;
 
 import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import fr.uga.projetannotation.database.AnnotateRepository;
-import fr.uga.projetannotation.model.ContactAnnotation;
-import fr.uga.projetannotation.model.EventAnnotation;
-import fr.uga.projetannotation.model.PicAnnotation;
-
+//stocke la liste des Uri de photo à afficher :
 public class DisplayGalleryViewModel extends AndroidViewModel {
 
     private List<Uri> mPicUris;

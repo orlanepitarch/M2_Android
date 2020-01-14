@@ -5,15 +5,12 @@ import android.net.Uri;
 import java.util.List;
 
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
-import androidx.room.RawQuery;
 import androidx.room.Transaction;
-import androidx.sqlite.db.SupportSQLiteQuery;
 
 import fr.uga.projetannotation.model.*;
 
@@ -36,9 +33,6 @@ public interface PicAnnotationDao {
     @Query("SELECT picUri FROM event_annotation UNION SELECT picUri FROM contact_annotation")
     LiveData<List<Uri>> loadAnnotations();
 
-    @Query("SELECT eventUri from event_annotation where picUri=:picUri")
-    LiveData<Uri> getEvent(Uri picUri);
-
     @Delete
     void deleteContact(ContactAnnotation c);
 
@@ -51,9 +45,6 @@ public interface PicAnnotationDao {
     @Transaction
     @Query("SELECT * from event_annotation where picUri=:picUri")
     LiveData<PicAnnotation> getPicAnnotation(Uri picUri);
-
-    @Query("SELECT eventUri from event_annotation where picUri=:picUri")
-    LiveData<Uri> getEventAnnotation(Uri picUri);
 
     @Transaction
     @Query("SELECT picUri from contact_annotation where contactUri IN (:contactUri) GROUP BY picUri HAVING COUNT(picUri) == :sizeContact")

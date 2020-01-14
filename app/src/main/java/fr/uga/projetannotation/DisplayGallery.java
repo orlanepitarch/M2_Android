@@ -1,27 +1,17 @@
 package fr.uga.projetannotation;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,20 +19,14 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import fr.uga.projetannotation.database.AnnotateRepository;
-import fr.uga.projetannotation.model.EventAnnotation;
-import fr.uga.projetannotation.model.PicAnnotation;
 
+//affiche sous forme de grid view toutes les images annotées ou toutes les images liées au résultat de la recherche :
 public class DisplayGallery extends AppCompatActivity {
     static final int REQUEST_PERMISSION_KEY = 1;
     private boolean readGalleryAuthorized = false;
@@ -51,22 +35,29 @@ public class DisplayGallery extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // lien avec le VM :
         mDisplayGalleryViewModel = new ViewModelProvider(this).get(DisplayGalleryViewModel.class);
+
         setContentView(R.layout.display_all_pictures);
         final GridView gridView = findViewById(R.id.gridView);
         final MutableLiveData<List<Uri>> listAnnot = new MutableLiveData<>();
         checkReadGalleryPermission();
         final GalleryAdapter galleryAdapter = new GalleryAdapter(this, listAnnot.getValue());
+        // Si la liste d'uri de photos est stockée dans le VM, on doit juste envoyer les données à l'adapter qui se chargera d'afficher les images :
         if(mDisplayGalleryViewModel.getPicUris().size() != 0 ) {
             if(readGalleryAuthorized) {
                 gridView.setAdapter(galleryAdapter);
                 galleryAdapter.setData(mDisplayGalleryViewModel.getPicUris());
             }
         } else {
+            //On reçoit les données via une activité, on lit la liste dans l'extra :
             Intent intent = getIntent();
             String test1 = intent.getStringExtra("IMGURIS");
+            // Puisque la liste arrive ici via .toString(), on doit enlever les [] identifiant une liste puis séparer selon les " , " afin de reconstituer une liste.
             List<String> imgUriString = (List<String>) Arrays.asList(test1.substring(1, test1.length()-1).split("\\s*(,\\s*)+"));
             List<Uri> imgUri = new ArrayList<>();
+            //On doit transformer la liste<String> en list<Uri> afin d'afficher les images. On doit faire attention à la provenance des images via leur URI afin de ne pas avoir
+            // d'exception liées à la permission de faire une imageView d'une Uri présente dans la BDD issue de la galerie du téléphone :
             if(imgUriString.size() != 0 && !imgUriString.toString().equals("[]")) {
                 for (String uri : imgUriString) {
                     if(Arrays.asList(uri.split("/")).get(3).equals("document")) {
@@ -86,7 +77,7 @@ public class DisplayGallery extends AppCompatActivity {
 
 
 
-        // When the user clicks on the GridItem
+        // Quand l'utilisateur clique sur un GirdItem, on lance l'activité Annotate avec la donnée sur l'image choisie afin d'fficher son annotation :
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> a, View v, int position, long id) {
@@ -100,7 +91,7 @@ public class DisplayGallery extends AppCompatActivity {
 
     }
 
-
+// Définition de l'adapter affichant dans le gridView les données, sous forme de GridItem (ou ViewHolder) composé d'ImageView :
     final class GalleryAdapter extends BaseAdapter {
         private List<Uri> data;
         private LayoutInflater layoutInflater;
@@ -168,6 +159,7 @@ public class DisplayGallery extends AppCompatActivity {
     static class ViewHolder {
         ImageView picUri;
     }
+
     public void checkReadGalleryPermission(){
         // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(this,

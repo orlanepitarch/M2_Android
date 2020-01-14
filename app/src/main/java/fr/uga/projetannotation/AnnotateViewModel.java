@@ -26,7 +26,6 @@ public class AnnotateViewModel extends AndroidViewModel {
     private List<Uri> mContact;
     private List<Uri> mContactsDelete;
 
-    private LiveData<List<EventAnnotation>> mAllAnnotation;
 
     public AnnotateViewModel(Application application) {
         super(application);
@@ -86,6 +85,7 @@ public class AnnotateViewModel extends AndroidViewModel {
         mEventUri.setValue(null);
     }
 
+    //on sauvegarde dans la BDD que si au moins une information d'annotation est présente :
     void save(){
         if(getEventUri().getValue() != null || (getContactsUri().getValue() != null && getContactsUri().getValue().size() > 0)) {
             insertPictureEvent(new EventAnnotation(getPicUri(), getEventUri().getValue()));

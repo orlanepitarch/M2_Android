@@ -3,10 +3,8 @@ package fr.uga.projetannotation;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.lifecycle.*;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -24,8 +22,6 @@ import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -58,7 +54,8 @@ public class Annotate extends AppCompatActivity {
 
         // on récupère l'intent créant l'activité :
         Intent intent = this.getIntent();
-        //tv = this.findViewById(R.id.imgUri);
+
+        //on instancie les variables, le ViewModel ainsi que l'adapter utile au recyclerView affichant les contacts :
         imgView = this.findViewById(R.id.imageView);
 
         contactView = this.findViewById(R.id.contactView);
@@ -67,8 +64,10 @@ public class Annotate extends AppCompatActivity {
         contactView.setLayoutManager(new LinearLayoutManager(this));
 
         mAnnotateViewModel = new ViewModelProvider(this).get(AnnotateViewModel.class);
+
         eventView = this.findViewById(R.id.eventPick);
 
+        //Si les données changent sur l'UI, on doit également modifier dans le VM (notamment lors d'une suppresssion)
         adapter.getAllContactsUri().observe(this, new  Observer<List<Uri>>() {
             @Override
             public void onChanged(List<Uri> listContact) {
@@ -76,7 +75,7 @@ public class Annotate extends AppCompatActivity {
             }
         });
 
-        //si des données sont stockées dans le VM :
+        //si des données sont stockées dans le VM -> l'activité est récrée suite à une rotation de l'écran, on doit réafficher les données:
         if(mAnnotateViewModel.getPicUri() != null ) {
             imgView.setImageURI(mAnnotateViewModel.getPicUri());
             if(mAnnotateViewModel.getContactsUri().getValue() != null) {
@@ -93,63 +92,57 @@ public class Annotate extends AppCompatActivity {
 
         }
         else {
-            // la photo pour l'annotation est choisie depuis la galerie puis partagée à notre application :
-            if (Intent.ACTION_SEND.equals(intent.getAction())) {
-                if(intent.getStringExtra("IMGURI") != null) {
-                    Uri imgUri = (Uri) Uri.parse(intent.getStringExtra("IMGURI"));
-                    if(!Arrays.asList(imgUri.toString().split("/")).get(3).equals("document")) {
-                        Toast.makeText(this,"Attention, cette source d'image n'est pas compatible avec la galerie d'annotation",Toast.LENGTH_LONG).show();
-                    }
+            // Si la photo pour l'annotation est choisie depuis le téléphone puis partagée à notre application (données dans l'extra de l'intent, mises par l'activité MAINACTIVITY) :
+            if (Intent.ACTION_SEND.equals(intent.getAction()) && intent.getStringExtra("IMGURI") != null) {
+                Uri imgUri = (Uri) Uri.parse(intent.getStringExtra("IMGURI"));
+                //si elle ne vient pas des documents du téléphone, on ne pourra pas l'afficher dans la galerie d'annotations, on l'indique donc à l'utilisateur :
+                if(!Arrays.asList(imgUri.toString().split("/")).get(3).equals("document")) {
+                    Toast.makeText(this,"Attention, cette source d'image n'est pas compatible avec la galerie d'annotation",Toast.LENGTH_LONG).show();
+                }
 
-                    mAnnotateViewModel.setPicUri(imgUri);
+                mAnnotateViewModel.setPicUri(imgUri);
 
-                    // Permet de définir les données si la photo est déjà annotée dans la BDD :
-                    mAnnotateViewModel.getPicAnnotation(imgUri).observe(this, new Observer<PicAnnotation>() {
-                        public void onChanged(@Nullable PicAnnotation annotation) {
-                            if (annotation != null) {
-                                if (annotation.getEventUri() != null) {
-                                    eventView.setText(getEventName(annotation.getEventUri().getLastPathSegment()));
-                                    mAnnotateViewModel.setEventUri(annotation.getEventUri());
-                                    findViewById(R.id.btnDeleteEvent).setVisibility(View.VISIBLE);
+                // Permet de définir les données contact et event si la photo est déjà annotée dans la BDD :
+                mAnnotateViewModel.getPicAnnotation(imgUri).observe(this, new Observer<PicAnnotation>() {
+                    public void onChanged(@Nullable PicAnnotation annotation) {
+                        if (annotation != null) {
+                            if (annotation.getEventUri() != null) {
+                                eventView.setText(getEventName(annotation.getEventUri().getLastPathSegment()));
+                                mAnnotateViewModel.setEventUri(annotation.getEventUri());
+                                findViewById(R.id.btnDeleteEvent).setVisibility(View.VISIBLE);
+                            }
+                            if (annotation.getContactUris() != null) {
+                                for (Uri contact : annotation.getContactUris()) {
+                                    mAnnotateViewModel.setContactUri(contact);
                                 }
-                                if (annotation.getContactUris() != null) {
-                                    for (Uri contact : annotation.getContactUris()) {
-                                        mAnnotateViewModel.setContactUri(contact);
-                                    }
-                                    adapter.setListContact(annotation.getContactUris());
-                                }
+                                adapter.setListContact(annotation.getContactUris());
                             }
                         }
-                    });
+                    }
+                });
 
-                    //Changement si la valeur de l'event change, on doit actualiser la valeur sur l'UI
-                    mAnnotateViewModel.getEventUri().observe(this, new  Observer<Uri>() {
-                        @Override
-                        public void onChanged(Uri uri) {
+                //Changement si la valeur de l'event change, on doit actualiser la valeur sur l'UI
+                mAnnotateViewModel.getEventUri().observe(this, new  Observer<Uri>() {
+                    @Override
+                    public void onChanged(Uri uri) {
+                        if(uri != null) {
                             String id = uri.getLastPathSegment();
                             eventView.setText(getEventName(id));
                         }
-                    });
+                    }
+                });
 
-                    mAnnotateViewModel.getContactsUri().observe(this, new  Observer<List<Uri>>() {
-                        @Override
-                        public void onChanged(List<Uri> contactsUri) {
-                            //appeler adapter.setContact(list contacts Uri) -> changer la méthode dans l'adapater et gérer l'insertion dans la liste des contacts
-                            // par la suite : gérer la suppression
-                        }
-                    });
-                    //afficher l'image :
-                    //pb pour la résolution des images (si trop grosse cette méthode sera problématique : => utiliser glide android
-                    imgView.setImageURI(imgUri);
+                //afficher l'image :
+                imgView.setImageURI(imgUri);
 
-                    // permet de supprimer un contact dans la BDD si un contact est supprimé sur l'UI :
-                    adapter.getContactDelete().observe(this, new Observer<Uri>() {
-                        @Override
-                        public void onChanged(Uri uri) {
-                            mAnnotateViewModel.deleteContact(uri);
-                        }
-                    });
-                }
+                // permet de supprimer un contact dans la BDD si un contact est supprimé sur l'UI (si la suppression est annulée, on réinsérera ce contact dans la BDD):
+                adapter.getContactDelete().observe(this, new Observer<Uri>() {
+                    @Override
+                    public void onChanged(Uri uri) {
+                        mAnnotateViewModel.deleteContact(uri);
+                    }
+                });
+
             // l'utilisateur lance l'annotation sans photo préalable -> pick photo à faire
             } else {
                 if(intent.getStringExtra("IMGURI") == null) {
@@ -166,7 +159,7 @@ public class Annotate extends AppCompatActivity {
 
     }
 
-    //Affiche un message pour choisir entre "Sauvegarder et Quitter" et "quitter" quand l'utilisateur appuie sur le bouton retour de sont téléphone.
+    //Affiche un message pour choisir entre "Sauvegarder et Quitter" et "quitter" quand l'utilisateur appuie sur le bouton retour de son téléphone :
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         //Handle the back button
         if (keyCode == KeyEvent.KEYCODE_BACK) {
@@ -174,7 +167,7 @@ public class Annotate extends AppCompatActivity {
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .setMessage("Êtes vous sûr de vouloir quitter sans sauvegarder ?")
 
-                    //si on ne veut pas sauvegarder les changements mais que l'utilisateur avait supprimé des contact ou un event, on doit les réinsérer dans la BDD :
+                    //si on ne veut pas sauvegarder les changements mais que l'utilisateur avait supprimé des contacts, on doit les réinsérer dans la BDD :
                     .setPositiveButton("Quitter", new DialogInterface.OnClickListener() {
 
                         @Override
@@ -203,8 +196,7 @@ public class Annotate extends AppCompatActivity {
         }
     }
 
-    // affiche les données, sans on avait l'interface de base meme avec le pick
-    // test sur les request code pour séparé le code en fonction de la provenance du startActivityForResult
+    // affiche les données, test sur les request code pour séparer le code en fonction de la provenance du startActivityForResult
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -267,6 +259,7 @@ public class Annotate extends AppCompatActivity {
 
     }
 
+    //Lance la sélection du contact si on clique sur "Choisir_Contact"
     public void onContactClick(View v) {
         checkContactReadPermission();
         if (readContactAuthorized) {
@@ -276,6 +269,7 @@ public class Annotate extends AppCompatActivity {
         }
     }
 
+    //Lance l'activité ChosseEvent si on clique sur "Choisir_Event"
     public void onEventClick(View v) {
         Intent event = new Intent(Annotate.this, ChooseEvent.class);
         Annotate.this.startActivityForResult(event, PICK_EVENT);
@@ -288,7 +282,7 @@ public class Annotate extends AppCompatActivity {
         eventView.setText("");
     }
 
-
+    //retourne le nom d'un event d'après son id -> permet d'afficher sur l'UI le nom plutot que l'URI
     public String getEventName(String id) {
         Cursor cursor = null;
         String result = "";
@@ -361,7 +355,7 @@ public class Annotate extends AppCompatActivity {
         }
     }
 
-    // confirmation pour quitter l'activité sans sauvegarder
+    // confirmation pour quitter l'activité sans sauvegarder (clic sur sur "X" dans la barre de menu)
     public void onCancelClick(View v){
         new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
@@ -393,7 +387,7 @@ public class Annotate extends AppCompatActivity {
         finish();
     }
 
-    // Suoorimer l'annotation :
+    // Supprimer l'annotation :
     public void onDeleteClick(View v){
         new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_alert)

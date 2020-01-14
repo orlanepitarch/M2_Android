@@ -14,8 +14,6 @@ import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.CalendarContract;
@@ -57,6 +55,8 @@ public class Search extends AppCompatActivity {
         eventView = this.findViewById(R.id.eventPick);
         displayDateDepart = this.findViewById(R.id.displayDateDepart);
         displayDateFin = this.findViewById(R.id.displayDateFin);
+
+        //Affiche la date choisie sur l'UI de l'utilisateur et modifie la valeur dans le VM :
         mDateSetListenerDepart = new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
@@ -67,7 +67,6 @@ public class Search extends AppCompatActivity {
                 btnDeleteDateDepart.setVisibility(View.VISIBLE);
             }
         };
-
         mDateSetListenerFin = new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
@@ -78,7 +77,6 @@ public class Search extends AppCompatActivity {
                 btnDeleteDateFin.setVisibility(View.VISIBLE);
             }
         };
-
 
 
         adapter.getAllContactsUri().observe(this, new  Observer<List<Uri>>() {
@@ -114,8 +112,6 @@ public class Search extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        //le if est utile si on fait retour avant d'avoir choisi une image -> sinon erreur
-        // + permet d'étudier que ça concerne bien le choix d'image
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == PICK_CONTACT && resultCode == RESULT_OK) {
@@ -132,6 +128,8 @@ public class Search extends AppCompatActivity {
         }
 
     }
+
+    //demande d'ajout de contact pour la recherche :
     public void onContactClick(View v) {
         checkContactReadPermission();
         if (readContactAuthorized) {
@@ -141,11 +139,13 @@ public class Search extends AppCompatActivity {
         }
     }
 
+    //demande d'ajout d'evenement pour la recherche :
     public void onEventClick(View v) {
         Intent event = new Intent(Search.this, ChooseEvent.class);
         Search.this.startActivityForResult(event, PICK_EVENT);
     }
 
+    //demande d'ajout de date de départ d'événements possibles pour la recherche :
     public void onDepartDateClick(View v) {
         Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
@@ -156,6 +156,7 @@ public class Search extends AppCompatActivity {
         dialog.show();
     }
 
+    //demande d'ajout de date de fin d'événements possibles pour la recherche :
     public void onDateFinClick(View v) {
         Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
@@ -166,6 +167,7 @@ public class Search extends AppCompatActivity {
         dialog.show();
     }
 
+    //mise a jour de l'UI et du VM si on supprime une date ou un evenement :
     public void onDeleteDateFinClick(View v) {
         mSearchViewModel.setDateFin(0,20,0);
         displayDateFin.setText("");
@@ -178,8 +180,6 @@ public class Search extends AppCompatActivity {
         ImageView btnDeleteDateDepart = findViewById(R.id.btnDeleteDateDepart);
         btnDeleteDateDepart.setVisibility(View.INVISIBLE);
     }
-
-
     public void onDeleteEventClick(View v) {
         ImageView btnDeleteEvent = findViewById(R.id.btnDeleteEvent);
         btnDeleteEvent.setVisibility(View.INVISIBLE);
@@ -187,20 +187,23 @@ public class Search extends AppCompatActivity {
         eventView.setText("");
     }
 
+    //Lancement de la recherche :
     public void onSearchClick(View v) {
         // test si la recherche est possible (au moins une condition de recherche valide) :
-        if((mSearchViewModel.getContactsUri().getValue() != null && mSearchViewModel.getContactsUri().getValue().size() == 0 && mSearchViewModel.getEventUri().getValue() != null)
+        if(((mSearchViewModel.getContactsUri().getValue() != null && mSearchViewModel.getContactsUri().getValue().size() == 0 && mSearchViewModel.getEventUri().getValue() != null) || (mSearchViewModel.getContactsUri().getValue() == null && mSearchViewModel.getEventUri().getValue()!= null))
         || (mSearchViewModel.getEventUri().getValue() == null && mSearchViewModel.getContactsUri().getValue() != null && mSearchViewModel.getContactsUri().getValue().size() != 0)
         || (mSearchViewModel.getTpsFin() != -1 && mSearchViewModel.getTpsDepart() !=-1 && mSearchViewModel.getTpsDepart() < mSearchViewModel.getTpsFin() && ContextCompat.checkSelfPermission(this.getApplication(), Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED)
         || (mSearchViewModel.getEventUri().getValue() != null && mSearchViewModel.getContactsUri().getValue() != null && mSearchViewModel.getContactsUri().getValue().size() != 0)
         ) {
             Toast.makeText(this, "Recherche en cours",Toast.LENGTH_LONG).show();
+            //appelle la fct de recherche située dans le VM :
             mSearchViewModel.search().observe(this, new Observer<List<Uri>>() {
                 @Override
                 public void onChanged(List<Uri> picUri) {
                     if(picUri.size() == 0) {
                         Toast.makeText(Search.this, "Pas de résultat !",Toast.LENGTH_LONG).show();
                     } else {
+                        //s'il y a des résultats, on envoie la liste<Uri> à l'activité DisplayGallerie afin d'afficher les résultats :
                         Intent intent = new Intent(Search.this, DisplayGallery.class);
                         intent.putExtra("IMGURIS", picUri.toString());
                         intent.setAction(Intent.ACTION_SEND);

@@ -63,16 +63,12 @@ public class ChooseEvent extends AppCompatActivity implements CalendarView.OnDat
         Uri selectedEvent = Uri.withAppendedPath(CalendarContract.Events.CONTENT_URI, item.getSelectionKey().toString());
         Intent res = new Intent();
         res.setData(selectedEvent);
-        //permet de renvoyer l'intent à l'activité déclenchant celle-ci et attendant le résultat
+        //permet de renvoyer l'intent à l'activité déclenchant celle-ci et attendant le résultat (Annotate)
         this.setResult(Activity.RESULT_OK,res);
         this.finish();
-        //ajouter les bons intent filter pour lancer un action pick sur données type calendar event
-        Toast.makeText(this,"event uri : "+selectedEvent,Toast.LENGTH_LONG).show();
         return false;
     }
     public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth){
-
-        Toast.makeText(this.getApplicationContext(), "Date : "+dayOfMonth+"/"+month+"/"+year, Toast.LENGTH_LONG).show();
 
         checkCalendarReadPermission();
         if (readCalendarAuthorized) {
