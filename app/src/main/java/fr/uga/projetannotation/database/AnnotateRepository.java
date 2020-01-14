@@ -2,7 +2,6 @@ package fr.uga.projetannotation.database;
 
 import android.app.Application;
 import android.net.Uri;
-import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 
@@ -24,7 +23,6 @@ public class AnnotateRepository {
         AnnotationDatabase.databaseWriteExecutor.execute(() -> {
             mAnnotationDao.insertPictureEvent(event);
         });
-        Log.v("repo insert", event.toString());
     }
     public void insertPictureContact(ContactAnnotation contact) {
         AnnotationDatabase.databaseWriteExecutor.execute(() -> {

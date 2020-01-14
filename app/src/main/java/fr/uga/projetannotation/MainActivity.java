@@ -9,7 +9,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -66,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, "Chargement en cours",Toast.LENGTH_LONG).show();
         mRepository.getAllAnnotation().observe(this, new Observer<List<Uri>>() {
             public void onChanged(@Nullable List<Uri> annotation) {
-                Log.v("cc", Integer.toString(countCallGallery));
                 //évite le lancement de la galerie à l'infini si on modifie l'annotation en cliquant dessus depuis la galerie : (
                 //on lance une seule fois l'activité même si les données change pdt qu'elle est lancées)
                 if (annotation != null && countCallGallery == 0) {
