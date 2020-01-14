@@ -105,7 +105,7 @@ public class Search extends AppCompatActivity {
             btnDeleteDateDepart.setVisibility(View.VISIBLE);
         }
         if(mSearchViewModel.getDisplayDateFin() != "") {
-            displayDateDepart.setText(mSearchViewModel.getDisplayDateFin());
+            displayDateFin.setText(mSearchViewModel.getDisplayDateFin());
             ImageView btnDeleteDateFin = findViewById(R.id.btnDeleteDateFin);
             btnDeleteDateFin.setVisibility(View.VISIBLE);
         }
